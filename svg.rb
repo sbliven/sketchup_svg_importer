@@ -336,20 +336,22 @@ class SVGFileImport
     @paramcount = -1
     @parameindex = 0
 
-    d.each(' ') { | sub | PathEntry( sub ) }
+    # Splits on space and comma
+    # TODO Allow strings like "M0,0L1,1 2 3" to comply with the spec
+    d.each(' ') { |i| i.split(',').each {| sub | PathEntry( sub ) }}
   end
 
   #---------------------------------------------------------------------
   # each entry in the d="..." string comes here
   def PathEntry( sub )
     sub.strip!
-
+    
     # @paramcount is used a bit like a state machine (that can count...)
     # >0 means the command has parameter that has to be read
     if (@paramcount > 0)
       # so store the parameter to array
       @paramcount = @paramcount - 1
-      @parameter[@paramindex] = sub.split(",")
+      @parameter[@paramindex] = sub
       @paramindex = @paramindex + 1
     end
 
@@ -358,9 +360,12 @@ class SVGFileImport
       case @cmd
         # todo: other commands might be needed:
         # for example the relative commands (small letters)
-        when "M" then MoveCommand()
-        when "L" then LineCommand()
-        when "C" then CubicCommand()
+        when "M" then MoveCommand(true)
+        when "m" then MoveCommand(false)
+        when "L" then LineCommand(true)
+        when "l" then LineCommand(false)
+        when "C" then CubicCommand(true)
+        #when "c" then CubicCommand(false)
       end
       @paramcount = -1
       @paramindex = 0
@@ -371,10 +376,14 @@ class SVGFileImport
       @paramcount = -1
 
       case @cmd
-        when "M" then @paramcount = 1
-        when "L" then @paramcount = 1
-        when "C" then @paramcount = 3
+        when "M" then @paramcount = 2
+        when "m" then @paramcount = 2
+        when "L" then @paramcount = 2
+        when "l" then @paramcount = 2
+        when "C" then @paramcount = 6
+        #when "c" then @paramcount = 6
         when "z" then CloseCommand()
+        when "Z" then CloseCommand()
         else
           DebugPuts "Unhandled Path Command: " + @cmd
       end
@@ -387,26 +396,39 @@ class SVGFileImport
   end
 
   #---------------------------------------------------------------------
-  # a "M" in the d="..." string
-  def MoveCommand()
-
+  # a "M" (abs=true) or "m" (abs=false) in the d="..." string
+  #
+  def MoveCommand(abs)
     #DebugPuts "Move"
 
-    x0 = @parameter[0][0].to_f
-    y0 = @parameter[0][1].to_f
+    
+    x0 = @parameter[0].to_f
+    y0 = @parameter[1].to_f
 
+    if !abs and @p0 != nil #relative AND not the first point
+        x0 += @p0.x
+        y0 += @p0.y
+    end
+    
     @p0 = Geom::Point3d.new(x0, y0)
     @ps = @p0
+    
+    #Treat further points as implicit line commands
+    if abs
+        @cmd = 'L'
+    else
+        @cmd = 'l'
+    end
   end
 
   #---------------------------------------------------------------------
-  # a "L" in the d="..." string
-  def LineCommand()
+  # a "L" (abs=true) or "l" (abs=false) in the d="..." string
+  def LineCommand(abs)
 
     #DebugPuts "Line"
 
-    x1 = @parameter[0][0].to_f
-    y1 = @parameter[0][1].to_f
+    x1 = @parameter[0].to_f
+    y1 = @parameter[1].to_f
 
     p1 = Geom::Point3d.new(x1, y1);
 
@@ -420,19 +442,19 @@ class SVGFileImport
   end
 
   #---------------------------------------------------------------------
-  # a "C" in the d="..." string
-  def CubicCommand()
+  # a "C" (abs=true) or "c" (abs=false) in the d="..." string
+  def CubicCommand(abs)
 
     #DebugPuts "CubicBezier"
 
-    x1 = @parameter[0][0].to_f
-    y1 = @parameter[0][1].to_f
+    x1 = @parameter[0].to_f
+    y1 = @parameter[1].to_f
 
-    x2 = @parameter[1][0].to_f
-    y2 = @parameter[1][1].to_f
+    x2 = @parameter[2].to_f
+    y2 = @parameter[3].to_f
 
-    x3 = @parameter[2][0].to_f
-    y3 = @parameter[2][1].to_f
+    x3 = @parameter[4].to_f
+    y3 = @parameter[5].to_f
 
     p1 = Geom::Point3d.new(x1, y1);
     p2 = Geom::Point3d.new(x2, y2);
