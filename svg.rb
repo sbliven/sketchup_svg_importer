@@ -849,7 +849,7 @@ class SVGFileImport
     if (filename == nil) then return nil; end
 
     model = Sketchup.active_model
-    model.start_operation "Import SVG File"
+    model.start_operation "Importer fichier SVG"
     begin
       DebugPuts "Parsing: "+ filename
       entities = model.active_entities
@@ -869,7 +869,7 @@ class SVGFileImport
       if (model)
         model.abort_operation
       end
-      UI.messagebox( "Error (in script) while reading \"" + filename + "\":\n" + bang )
+      UI.messagebox( "Erreur (dans le script) en lecture de \"" + filename + "\":\n" + bang )
     end
   end
 end
@@ -890,7 +890,7 @@ end
 #--------------------------------------------------------------------------
 
 def DoSVGImport
-    filename = UI.openpanel "Import SVG File",nil,"*.svg"
+    filename = UI.openpanel "Importer fichier SVG",nil,"*.svg"
     if (filename)
       f = SVGFileImport.new()
       f.ParseFile( filename )
@@ -899,10 +899,10 @@ end
 
 #--------------------------------------------------------------------------
 # Register within Sketchup
-if(file_loaded("svg.rb"))
+if(file_loaded("fr_svg.rb"))
  	menu = UI.menu("Plugins");
-	menu.add_item("Import SVG File...") { DoSVGImport() }
+	menu.add_item("Importer fichier SVG...") { DoSVGImport() }
 end
 
 #--------------------------------------------------------------------------
-file_loaded("svg.rb")
+file_loaded("fr_svg.rb")
