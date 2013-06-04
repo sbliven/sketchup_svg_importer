@@ -146,6 +146,8 @@ class SVGFileImport
     when 'g' then return :tk_group
     when 'a' then return :tk_a
     when 'path' then return :tk_path
+    when 'polygon' then return :tk_polygon
+    when 'polyline' then return :tk_polyline
     when 'line' then return :tk_line
     when 'image' then return :tk_image
     when 'rect' then return :tk_rect
@@ -671,6 +673,17 @@ class SVGFileImport
     IgnoreTag()
   end
 
+  def Polygon(sugroup)
+    attributes = @event[1]
+    id = attributes["id"]
+    DebugPuts "polygon not implemented"
+    IgnoreTag()
+  end
+  
+  def Polyline(sugroup)
+    DebugPuts "Polyline not implemented"
+    IgnoreTag()
+  end
   #---------------------------------------------------------------------
   def Image(sugroup)
     # attributes:
@@ -754,6 +767,8 @@ class SVGFileImport
       when :tk_image then Image( sugroup.entities.add_group )
       when :tk_rect then Rect( sugroup.entities.add_group )
       when :tk_line then Line( sugroup.entities.add_group )
+      when :tk_polygon then Polygon( sugroup.entities.add_group )
+      when :tk_polyline then Polyline( sugroup.entities.add_group )
 
       when :tk_text then IgnoreTag()
       when :tk_use then IgnoreTag()
@@ -796,8 +811,8 @@ class SVGFileImport
       when :tk_image then Image(sugroup.entities.add_group)
       when :tk_rect then Rect(sugroup.entities.add_group)
       when :tk_line then Line(sugroup.entities.add_group)
-      #when :tk_polyline then PolyLine(sugroup.entities.add_group)
-      #when :tk_polygon then Polygon(sugroup.entities.add_group)
+      when :tk_polyline then PolyLine(sugroup.entities.add_group)
+      when :tk_polygon then Polygon(sugroup.entities.add_group)
       when :tk_text then IgnoreTag()
       when :tk_use then IgnoreTag()
       when :tk_script then IgnoreTag()
