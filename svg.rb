@@ -86,6 +86,8 @@ class SVGFileImport
     @matrixdef = Regexp.new( "matrix\(.*\)" )
     @translatedef = Regexp.new( "translate\(.*\)" )
     @scaledef = Regexp.new( "scale\(.*\)" )
+    # Correctly handles integers, floating point, and exponentials
+    @numberdef = /[+-]?(?:(?:\d*\.\d+|\d+\.)(?:[eE][+-]?\d+)?|\d+[eE][+-]?[0-9]+|\d+)/
   end
 
   #--------------------------------------------------------------------------
@@ -331,68 +333,58 @@ class SVGFileImport
 
     DebugPuts "Path Def"
 
-    @cmd = nil
+    @cmd = nil #single character representing the current state
     @currGroup = sugroup
-    @paramcount = -1
-    @parameindex = 0
-
-    # Splits on space and comma
-    # TODO Allow strings like "M0,0L1,1 2 3" to comply with the spec
-    d.each(' ') { |i| i.split(',').each {| sub | PathEntry( sub ) }}
+    @parameter = [] #stores numeric parameters
+    @p0 = nil #current point
+    @ps = nil #initial point
+    
+    # Split path into path tokens
+    # Note that the spec is quite flexible about tokenization
+    # For instance, "M 1.0,2.0 L 3.1,0.4" is equivalent to "M1.0 2.L,3.1.4"
+    d.scan( /#{@numberdef}|[a-zA-Z]/ ) {| sub | PathEntry( sub ) }
   end
 
   #---------------------------------------------------------------------
   # each entry in the d="..." string comes here
-  def PathEntry( sub )
-    sub.strip!
+  def PathEntry( token )
+    token.strip!
     
-    # @paramcount is used a bit like a state machine (that can count...)
-    # >0 means the command has parameter that has to be read
-    if (@paramcount > 0)
-      # so store the parameter to array
-      @paramcount = @paramcount - 1
-      @parameter[@paramindex] = sub
-      @paramindex = @paramindex + 1
+    # To implement new commands, add a handler in the case @cmd and also add 
+    # it to the regex above "Unhandled Path Command"
+    
+    case token
+    when /^[MZLCHVSQTA]$/i # Valid (but not all supported) path commands
+      @cmd = token
+      
+      case @cmd
+      when "Z","z" then CloseCommand()
+      when /^[^MmLlCcZz]$/ #List supported commands here
+        DebugPuts "Unhandled Path Command: #{@cmd}"
+      end
+    when /^#{@numberdef}$/ #parameters
+      @parameter.push token.to_f
+      
+      case @cmd
+      when "M"
+        MoveCommand(true) if @parameter.length == 2
+      when "m"
+        MoveCommand(false) if @parameter.length == 2
+      when "L"
+        LineCommand(true) if @parameter.length == 2
+      when "l"
+        LineCommand(false) if @parameter.length == 2
+      when "C"
+        CubicCommand(true) if @parameter.length == 6
+      when "c"
+        CubicCommand(false) if @parameter.length == 6
+      else
+        @parameter = [] #consume parameters for unsupported commands
+      end
+    else
+      DebugPuts "Malformed path command. Unknown token #{@cmd}"
     end
 
-    # 0 means the command is complete
-    if (@paramcount == 0)
-      case @cmd
-        # todo: other commands might be needed:
-        # for example the relative commands (small letters)
-        when "M" then MoveCommand(true)
-        when "m" then MoveCommand(false)
-        when "L" then LineCommand(true)
-        when "l" then LineCommand(false)
-        when "C" then CubicCommand(true)
-        #when "c" then CubicCommand(false)
-      end
-      @paramcount = -1
-      @paramindex = 0
-
-    # -1 means no command yet: start a new one
-    elsif (@paramcount == -1)
-      @cmd = sub
-      @paramcount = -1
-
-      case @cmd
-        when "M" then @paramcount = 2
-        when "m" then @paramcount = 2
-        when "L" then @paramcount = 2
-        when "l" then @paramcount = 2
-        when "C" then @paramcount = 6
-        #when "c" then @paramcount = 6
-        when "z" then CloseCommand()
-        when "Z" then CloseCommand()
-        else
-          DebugPuts "Unhandled Path Command: " + @cmd
-      end
-
-      if @paramcount > 0
-        @parameter = Array.new(@paramcount)
-        @paramindex = 0
-      end
-    end
   end
 
   #---------------------------------------------------------------------
@@ -404,6 +396,7 @@ class SVGFileImport
     
     x0 = @parameter[0].to_f
     y0 = @parameter[1].to_f
+    @parameter = []
 
     if !abs and @p0 != nil #relative AND not the first point
         x0 += @p0.x
@@ -411,7 +404,7 @@ class SVGFileImport
     end
     
     @p0 = Geom::Point3d.new(x0, y0)
-    @ps = @p0
+    @ps = @p0 #all moves update initial point
     
     #Treat further points as implicit line commands
     if abs
@@ -429,6 +422,12 @@ class SVGFileImport
 
     x1 = @parameter[0].to_f
     y1 = @parameter[1].to_f
+    @parameter = []
+    
+    if !abs and @p0 != nil #relative AND not the first point
+        x1 += @p0.x
+        y1 += @p0.y
+    end
 
     p1 = Geom::Point3d.new(x1, y1);
 
@@ -455,7 +454,17 @@ class SVGFileImport
 
     x3 = @parameter[4].to_f
     y3 = @parameter[5].to_f
-
+    @parameter = []
+    
+    if !abs and @p0 != nil #relative AND not the first point
+        x1 += @p0.x
+        y1 += @p0.y
+        x2 += @p0.x
+        y2 += @p0.y
+        x3 += @p0.x
+        y3 += @p0.y
+    end
+    
     p1 = Geom::Point3d.new(x1, y1);
     p2 = Geom::Point3d.new(x2, y2);
     p3 = Geom::Point3d.new(x3, y3);
@@ -495,6 +504,9 @@ class SVGFileImport
        @lastEdge.find_faces
        @lastEdge = nil
      end
+     
+     @p0 = @ps # current point becomes initial point
+     
   end
 
   #---------------------------------------------------------------------
@@ -706,6 +718,7 @@ class SVGFileImport
     DebugPuts "Polyline not implemented"
     IgnoreTag()
   end
+  
   #---------------------------------------------------------------------
   def Image(sugroup)
     # attributes:
@@ -937,8 +950,8 @@ end
 #--------------------------------------------------------------------------
 # Register within Sketchup
 if(file_loaded("svg.rb"))
- 	menu = UI.menu("Plugins");
-	menu.add_item("Import SVG File...") { DoSVGImport() }
+  menu = UI.menu("Plugins");
+  menu.add_item("Import SVG File...") { DoSVGImport() }
 end
 
 #--------------------------------------------------------------------------
