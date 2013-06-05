@@ -927,12 +927,12 @@ end
 
 #--------------------------------------------------------------------------
 # Quick Debug Code, can be called by the ruby console
-def svgParserTest()
+def svgParserTest(file=File.dirname(__FILE__)+'/test.svg')
   was = $svgImportScriptDebug
   begin
     $svgImportScriptDebug = true
     f = SVGFileImport.new()
-    f.Parse( 'c:/temp/dummy.svg' )
+    f.ParseFile( file )
   ensure
     $svgImportScriptDebug = was
   end
