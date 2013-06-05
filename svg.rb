@@ -1,4 +1,5 @@
 #-----------------------------------------------------------------------------
+#  Copyright (C) 2013 Spencer Bliven (spencer@bliven.us)
 #  Copyright (C) 2008 Uli Tessel (utessel@gmx.de)
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -15,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------
 #
-#  SVG File Import for Inkscape files (Version 0.3)
+#  SVG File Import for Inkscape files (Version 0.4)
 #
 #  This script allows to use Inkscape to create 2D images (for example by
 #  using Inkscapes bitmap vectorizer) and to create Sketchup group(s)
@@ -25,54 +26,9 @@
 #  will get a whole tree of groups if you had one in your SVG File.
 #
 #-----------------------------------------------------------------------------
-#  Maybe you ask: Why should one use Inkscape and Sketchup together?
-#
-#  Inkscape is really nice for 2D, especially, but not only due to the
-#  bitmap vectorizer. And curves editing etc. is much easier than in
-#  Sketchup:
-#  So if I have a foto or a scan of a drawing, I can convert it to
-#  a 2D vectorized file in Inkscape with a few clicks. Than mabye
-#  work a bit on it to simplify it. Than, with this script, you can
-#  continue to use it in 3D!
-#
-#-----------------------------------------------------------------------------
-#  Notes:
-#  - this is my first ruby script. This might explain strange coding
-#  styles... Please mail me if you know how to do some things better.
-#
-#  - There is a global debug switch that you can use to get a dump
-#  of what the code does. This might help when finding why a file
-#  looks strange: In the ruby console type
-#  $svgImportScriptDebug=true
-#
-#  - Some other global flags are here and there. search for "$" to find
-#  them.
-#
-#  - as SVG Files are XML files, the code requires (parts of) REXML:
-#  to be able to use REXML in Sketchup (at least for this code), you
-#  have to add two source files from the Ruby-Lib to Sketchup:
-#  "set.rb" and "forwardable.rb"
-#
-#  - it also requires the nice "bezier.rb", as SVG files can contain
-#  beziers. The generated beziers should still be editable: The code
-#  sets the same attributes as bezier.rb does.
-#
-#-----------------------------------------------------------------------------
-#  Future:
-#  - It might be interesting to use some attributes (like the color
-#  of a stroke) to control the Z-Value. With this common trick it is
-#  possible to use Inkscape for some kind of 2.5D. So why not use
-#  this information for Sketchup? Currently this is not implemented.
-#
-#  - Some SVG Types are missing: (especially "Line")
-#  - only a few commands of a pathdef are handled yet
-#
-#-----------------------------------------------------------------------------
-#  Bugs:
-#  - faces are not created correctly: too many, holes are wrong, etc.
-#  - a lot information is simply ignored from the SVG files
-#-----------------------------------------------------------------------------
+
 require 'Sketchup.rb'
+# Available at http://rhin.crai.archi.fr/RubyLibraryDepot/plugin_details.php?id=33
 require 'bezier.rb'
 
 require 'rexml/parsers/pullparser.rb'
@@ -956,3 +912,4 @@ end
 
 #--------------------------------------------------------------------------
 file_loaded("svg.rb")
+
