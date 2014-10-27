@@ -276,7 +276,7 @@ class SVGFileImport
   #---------------------------------------------------------------------
   # execute the style definition string
   def DoStyle( group, style )
-     style.each(';') { |entry| DoStyleEntry( group, entry ) }
+     style.each_line(';') { |entry| DoStyleEntry( group, entry ) }
   end
 
   #---------------------------------------------------------------------
@@ -875,7 +875,8 @@ class SVGFileImport
       if (model)
         model.abort_operation
       end
-      UI.messagebox( "Error (in script) while reading \"" + filename + "\":\n" + bang )
+      UI.messagebox( "Error (in script) while reading \"" + filename + "\":\n" + bang.to_s )
+      puts bang.backtrace
     end
   end
 end
