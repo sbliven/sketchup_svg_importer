@@ -10,7 +10,7 @@ by Uli Tessel with some additional features and bug fixes.
 ## Dependencies
 
 * The Bezier.rb plugin, available from the
-  [Ruby Library Depot](http://rhin.crai.archi.fr/RubyLibraryDepot/plugin_details.php?id=33)
+  [Ruby Library Depot](http://rhin.crai.archi.fr/rld/plugin_details.php?id=33)
 * The rexml ruby library
 * forwardable.rb
 * set.rb
