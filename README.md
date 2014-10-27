@@ -97,6 +97,11 @@ the full terms.
 
 ## History
 
+**0.5**
+Support for Sketchup 2014
+* Ruby 2.0 compatibility
+* Minor bug fixes
+
 **0.4**
 SVG compatibility improvements (Spencer Bliven)
 * Support for relative coordinates in paths

@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-----------------------------------------------------------------------------
 #
-#  SVG File Import for Inkscape files (Version 0.4)
+#  SVG File Import for Inkscape files (Version 0.5)
 #
 #  This script allows to use Inkscape to create 2D images (for example by
 #  using Inkscapes bitmap vectorizer) and to create Sketchup group(s)
