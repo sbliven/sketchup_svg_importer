@@ -1,51 +1,30 @@
-Sketch SVG Importer
-===================
+SketchUp SVG Importer
+=====================
 
-This is a plugin for Sketchup versions 6+. Use it to import simple SVG images
-into sketchup, where they can be extruded into 3D and further modified.
+This is a plugin for SketchUp versions 6+. Use it to import simple SVG images
+into SketchUp, where they can be extruded into 3D and further modified.
 
 This version extends the [excellent script](http://rhin.crai.archi.fr/rld/plugin_details.php?id=435)
 by Uli Tessel with some additional features and bug fixes.
 
-## Dependencies
-
-* The Bezier.rb plugin, available from the
-  [Ruby Library Depot](http://rhin.crai.archi.fr/rld/plugin_details.php?id=33)
-* The rexml ruby library
-* forwardable.rb
-* set.rb
-
-Forwardable and set shipped with a standard ruby installation. REXML should
-come with 1.8, but sketchup seems to expect it to be located inside the plugins
-folder. Just copy the directory to your plugins directory.
-
 ## Installation
 
-Copy svg.rb to your plugins folder. On Windows, this will be *C:\Program Files\Google\Google SketchUp #\Plugins*.
-On a Mac, *~/Library/Application Support/Google SketchUp #/SketchUp/plugins*.
-Bezier.rb can be installed the same way.
+Copy *svg_import.rb* file and *svg_import* folder to your plugins folder. On Windows, this will be *%APPDATA%\SketchUp\SketchUp #\SketchUp\Plugins*.
+On a Mac, *~/Library/Application Support/SketchUp #/SketchUp/Plugins*.
 
-Installing the other three dependencies can be troublesome. Some instructions
-for getting them on Windows are given in
-[this thread](http://sketchucation.com/forums/viewtopic.php?f=323&p=258154).
-
-On a Mac using MacPorts, forwarded.rb and set.rb were loaded automatically
-(since Macs ship with Ruby). I used the following commands to install rexml.
-
-    sudo port install rb-rexml
-    ln -s /opt/local/lib/ruby/vendor_ruby/1.8/rexml "~/Library/Application Support/Google SketchUp 8/SketchUp/plugins"
+All dependencies are already included.
 
 ## Usage
 
 The plugin adds a 'Import SVG File...' option in the Plugins menu. The SVG will
 be imported into a new group. The object structure within the SVG will be
 preserved, meaning that groups of objects within the SVG will become nested
-groups in Sketchup. Note that several explode operations may be required to
+groups in SketchUp. Note that several explode operations may be required to
 move geometry into the top-level model.
 
 ## Global Flags
 
-The following flags can be set using the ruby console to help with debugging
+The following flags can be set using the Ruby console to help with debugging
 and change some behaviours:
 
 * _$svgImportScriptDebug _If true, print debugging information
@@ -63,12 +42,6 @@ svg output
 * Save files as 'Plain SVG' ('Simple SVG' in some locales)
 
 (Suggested by Sketchucation user [TIG](http://sketchucation.com/forums/viewtopic.php?f=180&t=13475))
-
-## Known Conflicts
-
-The SVG Importer uses set.rb, which conflicts with Sketchup's built-in Set
-class. This causes problems with some programs which require Set, namely smoove
-from Sandbox Tools.
 
 ## Known Bugs/Missing features
 
@@ -88,7 +61,6 @@ requests can be made on
     control the Z-Value. With this common trick it is possible to use Inkscape
     for some kind of 2.5D.
 * Bug: faces are not created correctly: too many, holes are wrong, etc.
-* Bug: Incompatible with smoove
 
 ## License
 
@@ -97,8 +69,13 @@ the full terms.
 
 ## History
 
+**0.6**
+Adds compatibility with Smoove from Sandbox Tools (Samuel Tallet-Sabathé)
+* Includes all dependencies
+* Displays more info in extension manager
+
 **0.5**
-Support for Sketchup 2014
+Support for SketchUp 2014
 * Ruby 2.0 compatibility
 * Minor bug fixes
 
